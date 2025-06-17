@@ -66,7 +66,6 @@ def match_example1(item):
     global t_temp1
 
     pattern1 = b'\xEb\x90'
-    pattern1 = b'\xEb\x90'
     n=0
     while n <2176:
         t_temp = t_temp1
