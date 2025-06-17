@@ -23,10 +23,10 @@ eof = file.tell()
 file.seek(0,0)
 data = file.read()
 t_temp1 = 0
-fs1 = 4000
+fs1 = 8000
 
 t_temp2 = 0
-fs2 = 8000
+fs2 = 4000
 
 mlong = 0
 data_temp = None
@@ -48,10 +48,10 @@ f2 = open(file_name+"传感器2数据.txt", "w+")
 #         + '\t' + 'HRG_ZT'+ '\t'+ 'HRG_rate' + '\t'+ 'HRG_angle' \
 #         + '\t' + 'HRG_freq'+ '\t'+ 'HRG_fz' + '\t'+ 'HRG_zj' \
 #         + '\t' + 'HRG_CNT'+ '\t'+ '温度' + '\t'+ '校验和'
-f1.write(  '时标'+  '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴'  )
+f1.write(  '时间'+  '\t' + 'X轴(°/s）'+'\t'+ 'Y轴(°/s）'+ '\t'+ 'Z轴(°/s）'  )
 # f1.write('\n')
 
-f2.write( '时标'+  '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴' )
+f2.write( '时间'+  '\t' + 'X轴（g）'+'\t'+ 'Y轴（g）'+ '\t'+ 'Z轴（g）' )
 
 
 
@@ -74,13 +74,13 @@ def match_example1(item):
         f1.write(str1)
         m = item.find(pattern1, n, 2176)
         if m != -1 and m+8<2184:
-            dat = int.from_bytes(item[m+2:m+4], byteorder='big', signed=True)/2**8
+            dat = int.from_bytes(item[m+2:m+4], byteorder='big', signed=True)/65.5
             str1 = '\t' + str(dat)
             f1.write(str1)
-            dat = int.from_bytes(item[m+4:m+6], byteorder='big', signed=True)/2**8
+            dat = int.from_bytes(item[m+4:m+6], byteorder='big', signed=True)/65.5
             str1 = '\t' + str(dat)
             f1.write(str1)
-            dat = int.from_bytes(item[m+6:m+8], byteorder='big', signed=True)/2**8
+            dat = int.from_bytes(item[m+6:m+8], byteorder='big', signed=True)/65.5
             str1 = '\t' + str(dat)
             f1.write(str1)
         else:
@@ -89,17 +89,18 @@ def match_example1(item):
         t_temp1 = t_temp1 + 1/fs1
 
 def match_example2(item,data_temp1,rlong):
+    ampliy_paramater = 51200*16
     global t_temp2
     if rlong !=0:
 
         data_temp2 = data_temp1 + item[0:11-rlong]
-        dat = int.from_bytes(data_temp2[2:5], byteorder='big', signed=True) / 2 ** 8
+        dat = int.from_bytes(data_temp2[2:5], byteorder='big', signed=True) /ampliy_paramater
         str1 = '\t' + str(dat)
         f2.write(str1)
-        dat = int.from_bytes(data_temp2[5:8], byteorder='big', signed=True) / 2 ** 8
+        dat = int.from_bytes(data_temp2[5:8], byteorder='big', signed=True) / ampliy_paramater
         str1 = '\t' + str(dat)
         f2.write(str1)
-        dat = int.from_bytes(data_temp2[8:11], byteorder='big', signed=True) / 2 ** 8
+        dat = int.from_bytes(data_temp2[8:11], byteorder='big', signed=True) / ampliy_paramater
         str1 = '\t' + str(dat)
         f2.write(str1)
         t_temp2 = t_temp2 + 1/fs2
@@ -114,13 +115,13 @@ def match_example2(item,data_temp1,rlong):
         f2.write(str1)
         m = item.find(pattern1, n, 2176)
         if m != -1 and m+11<2176:
-            dat = int.from_bytes(item[m+2:m+5], byteorder='big', signed=True)/2**12
+            dat = int.from_bytes(item[m+2:m+5], byteorder='big', signed=True)/ampliy_paramater
             str1 = '\t' + str(dat)
             f2.write(str1)
-            dat = int.from_bytes(item[m+5:m+8], byteorder='big', signed=True)/2**12
+            dat = int.from_bytes(item[m+5:m+8], byteorder='big', signed=True)/ampliy_paramater
             str1 = '\t' + str(dat)
             f2.write(str1)
-            dat = int.from_bytes(item[m+8:m+11], byteorder='big', signed=True)/2**12
+            dat = int.from_bytes(item[m+8:m+11], byteorder='big', signed=True)/ampliy_paramater
             str1 = '\t' + str(dat)
             f2.write(str1)
             mlong = 0
