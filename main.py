@@ -48,10 +48,10 @@ f2 = open(file_name+"传感器2数据.txt", "w+")
 #         + '\t' + 'HRG_ZT'+ '\t'+ 'HRG_rate' + '\t'+ 'HRG_angle' \
 #         + '\t' + 'HRG_freq'+ '\t'+ 'HRG_fz' + '\t'+ 'HRG_zj' \
 #         + '\t' + 'HRG_CNT'+ '\t'+ '温度' + '\t'+ '校验和'
-f1.write(  '时标'+ '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴'  )
+f1.write(  '时标'+  '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴'  )
 # f1.write('\n')
 
-f2.write( '时标'+ '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴' )
+f2.write( '时标'+  '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴' )
 
 
 
@@ -65,6 +65,7 @@ f2.write( '时标'+ '\t' + 'X轴'+'\t'+ 'Y轴'+ '\t'+ 'Z轴' )
 def match_example1(item):
     global t_temp1
 
+    pattern1 = b'\xEb\x90'
     pattern1 = b'\xEb\x90'
     n=0
     while n <2176:
