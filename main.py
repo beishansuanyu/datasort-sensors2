@@ -130,9 +130,9 @@ def match_example2(item,data_temp1,rlong):
             data_temp = item[m:2176]
             break
         else:
-
             mlong = 0
             data_temp = None
+            break
         n = m+11
 
         t_temp2 = t_temp2 + 1/fs2
@@ -169,6 +169,7 @@ def match_example2(item,data_temp1,rlong):
 
 
 pattern1 = b'\x1a\xcf\xfc\x1d'
+
 n = 0
 while n <eof:
     m = data.find(pattern1,n,eof)
@@ -179,10 +180,7 @@ while n <eof:
         elif channel == b'\x55\x55':
              data_temp,mlong = match_example2(data[m + 8:m + 2184],data_temp,mlong)
         else:
-            None
-
-
-
+            k = 0
 
     else:
         break
