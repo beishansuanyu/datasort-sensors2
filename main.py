@@ -26,7 +26,7 @@ t_temp1 = 0
 fs1 = 8000
 
 t_temp2 = 0
-fs2 = 4000
+fs2 = 3333
 
 mlong = 0
 data_temp = None
@@ -86,7 +86,7 @@ def match_example1(item):
             break
         n = m+8
         t_temp1 = t_temp1 + 1/fs1
-
+ 
 def match_example2(item,data_temp1,rlong):
     ampliy_paramater = 51200*16
     global t_temp2
