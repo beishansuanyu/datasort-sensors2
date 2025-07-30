@@ -16,25 +16,30 @@ f_path = filedialog.askopenfilename()
 
 file = open(f_path, 'rb')
 file_name = f_path.split('.')[0]
+file_namelist = f_path.split('/')
+long = len(file_namelist)
+filename2 = file_namelist[long-1].split('.')[0]
 file.seek(0, 2)
 eof = file.tell()
 file.seek(0, 0)
 data = file.read()
 
-datazhen_leng = 6  #单数据组长度
+datazhen_leng = 18  #单数据组长度
 data_leng = 2
 
 t_temp1 = 0
 fs1 = 8000
 
 t_temp2 = 0
-fs2 = 50000
+fs2 = 20000
 
 mlong = 0
 data_temp = None
 
 # f1 = open(file_name + "传感器1数据.txt", "w+")
-f2 = open(file_name + "模拟通道数据数据.txt", "w+")
+# f2 = open(file_name + "模拟通道数据数据.txt", "w+")
+f2 = open(filename2 + "模拟通道数据数据.txt", "w+")
+data_leng = 2
 # f0 = open("数字通道1数据.dat",'wb')
 # f1 = open("数字通道2数据.dat",'wb')
 # f2 = open("模拟通道数据数据.txt",'w+')
@@ -51,7 +56,16 @@ f2 = open(file_name + "模拟通道数据数据.txt", "w+")
 # f1.write('时间' + '\t' + '通道1' + '\t' + '通道1' )
 # f1.write('\n')
 
-f2.write('时间' + '\t' + '通道1' + '\t' + '通道2')
+f2.write('时间' + '\t' + '通道1' + '\t' + '通道2'+ '\t' + '通道3'+ '\t' + '通道4'+ '\t' + '通道5'+ '\t' + '通道6'+ '\t' + '通道7'+ '\t' + '通道8')
+xishu = [[0,1],
+         [0,1],
+         [0,1],
+         [0,1],
+         [0,1],
+         [0,2.2],
+         [0,2.2],
+         [0,2.2]]
+
 
 
 # def match_example1(item):
@@ -80,38 +94,53 @@ f2.write('时间' + '\t' + '通道1' + '\t' + '通道2')
 #         t_temp1 = t_temp1 + 1 / fs1
 
 
-def match_example2(item, data_temp1, rlong):
+def match_example3(item, data_temp1, rlong):
     ampliy_paramater = 2**15
     global t_temp2
     if rlong != 0:
 
+        i2 = 0
+
         data_temp2 = data_temp1 + item[0:datazhen_leng - rlong]
-        data_temp3 = data_temp2[2:2+data_leng]
-        dat = int.from_bytes(data_temp2[2:2+data_leng], byteorder='big', signed=True) / ampliy_paramater*5
-        str1 = '\t' + str('{:.6f}'.format(dat))
-        f2.write(str1)
-        dat = int.from_bytes(data_temp2[2+data_leng:2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater*11
-        str1 = '\t' + str('{:.6f}'.format(dat))
-        f2.write(str1)
+        while i2 <8:
+            m2 = i2*2
+            data_temp3 = data_temp2[2+m2:2+m2+data_leng]
+            dat = (int.from_bytes(data_temp2[2+m2:2+m2+data_leng], byteorder='big', signed=True) / ampliy_paramater*10 - xishu[i2][0])*xishu[i2][1]
+            str1 = '\t' + str('{:.6f}'.format(dat))
+            f2.write(str1)
+            i2 = i2+1
+
+        # dat = int.from_bytes(data_temp2[2+data_leng:2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater
+        # str1 = '\t' + str('{:.6f}'.format(dat))
+        # f2.write(str1)
 
         t_temp2 = t_temp2 + 1 / fs2
     else:
         None
 
     pattern1 = b'\xEb'
-    n = 0
+    n = datazhen_leng-rlong
     while n < 2176:
         t_temp = t_temp2
         str1 = '\n' + str(t_temp)
         f2.write(str1)
         m = item.find(pattern1, n, 2176)
         if m != -1 and m + datazhen_leng < 2176:
-            dat = int.from_bytes(item[m+2:m+2+data_leng], byteorder='big', signed=True) /ampliy_paramater*5
-            str1 = '\t' + str( '{:.6f}'.format(dat))
-            f2.write(str1)
-            dat = int.from_bytes(item[m+2+data_leng:m+2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater*11
-            str1 = '\t' + str( '{:.6f}'.format(dat))
-            f2.write(str1)
+
+            i3 = 0
+            while i3 < 8:
+                m3 = i3*2
+                data_temp3 = item[m + 2+m3:m + 2+m3 + data_leng]
+                dat = (int.from_bytes(item[m + 2+m3:m + 2+m3 + data_leng], byteorder='big', signed=True) / ampliy_paramater*10- xishu[i3][0])*xishu[i3][1]
+                str1 = '\t' + str('{:.6f}'.format(dat))
+                f2.write(str1)
+                i3 = i3+1
+            # dat = int.from_bytes(item[m+2:m+2+data_leng], byteorder='big', signed=True) /ampliy_paramater*5
+            # str1 = '\t' + str( '{:.6f}'.format(dat))
+            # f2.write(str1)
+            # dat = int.from_bytes(item[m+2+data_leng:m+2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater*11
+            # str1 = '\t' + str( '{:.6f}'.format(dat))
+            # f2.write(str1)
 
             mlong = 0
             data_temp = None
@@ -167,9 +196,9 @@ while n < eof:
     if m != -1 and m + 2184 < eof:
         channel = data[m + 6:m + 8]
         if channel == b'\x00\x10':
-            data_temp, mlong = match_example2(data[m + 8:m + 2184], data_temp, mlong)
+            data_temp, mlong = match_example3(data[m + 8:m + 2184], data_temp, mlong)
         else:
-            k = 0
+            pass
 
     else:
         break

@@ -22,19 +22,30 @@ file.seek(0,2)
 eof = file.tell()
 file.seek(0,0)
 data = file.read()
+
+datazhen_leng = 6  #单数据组长度
+data_leng = 2
+
+
 t_temp1 = 0
 fs1 = 8000
 
 t_temp2 = 0
 fs2 = 3333
 
-mlong = 0
-data_temp = None
+t_temp3 = 0
+fs3 = 50000
+
+mlong1 = 0
+data_temp1 = None
+mlong2 = 0
+data_temp2 = None
 
 
 
 f1 = open(file_name+"传感器1数据.txt", "w+")
 f2 = open(file_name+"传感器2数据.txt", "w+")
+f3 = open(file_name + "模拟通道数据数据.txt", "w+")
 # f0 = open("数字通道1数据.dat",'wb')
 # f1 = open("数字通道2数据.dat",'wb')
 # f2 = open("模拟通道数据数据.txt",'w+')
@@ -52,6 +63,7 @@ f1.write(  '时间'+  '\t' + 'X轴(°/s）'+'\t'+ 'Y轴(°/s）'+ '\t'+ 'Z轴(°
 # f1.write('\n')
 
 f2.write( '时间'+  '\t' + 'X轴（g）'+'\t'+ 'Y轴（g）'+ '\t'+ 'Z轴（g）' )
+f3.write('时间' + '\t' + '通道1' + '\t' + '通道2')
 
 
 
@@ -99,6 +111,7 @@ def match_example2(item,data_temp1,rlong):
         dat = int.from_bytes(data_temp2[5:8], byteorder='big', signed=True) / ampliy_paramater
         str1 = '\t' + str(dat)
         f2.write(str1)
+
         dat = int.from_bytes(data_temp2[8:11], byteorder='big', signed=True) / ampliy_paramater
         str1 = '\t' + str(dat)
         f2.write(str1)
@@ -107,7 +120,12 @@ def match_example2(item,data_temp1,rlong):
         None
 
     pattern1 = b'\xEb'
-    n=0
+    if rlong !=0:
+        n = 11-rlong
+    elif rlong==0:
+        n = 0
+    else:
+        n = 0
     while n <2176:
         t_temp = t_temp2
         str1 = '\n' + str(t_temp)
@@ -137,6 +155,55 @@ def match_example2(item,data_temp1,rlong):
 
         t_temp2 = t_temp2 + 1/fs2
     return data_temp,mlong
+
+def match_example3(item, data_temp1, rlong):
+    ampliy_paramater = 2**15
+    global t_temp3
+    if rlong != 0:
+
+        data_temp2 = data_temp1 + item[0:datazhen_leng - rlong]
+        dat = int.from_bytes(data_temp2[2:2+data_leng], byteorder='big', signed=True) / ampliy_paramater*5
+        str1 = '\t' + str('{:.6f}'.format(dat))
+        f3.write(str1)
+        dat = int.from_bytes(data_temp2[2+data_leng:2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater*11
+        str1 = '\t' + str('{:.6f}'.format(dat))
+        f3.write(str1)
+
+        t_temp3 = t_temp3 + 1 / fs3
+    else:
+        None
+
+    pattern1 = b'\xEb'
+    n = 0
+    while n < 2176:
+        t_temp = t_temp3
+        str1 = '\n' + str(t_temp)
+        f3.write(str1)
+        m = item.find(pattern1, n, 2176)
+        if m != -1 and m + datazhen_leng < 2176:
+            dat = int.from_bytes(item[m+2:m+2+data_leng], byteorder='big', signed=True) /ampliy_paramater*5
+            str1 = '\t' + str( '{:.6f}'.format(dat))
+            f3.write(str1)
+            dat = int.from_bytes(item[m+2+data_leng:m+2+data_leng*2], byteorder='big', signed=True) / ampliy_paramater*11
+            str1 = '\t' + str( '{:.6f}'.format(dat))
+            f3.write(str1)
+
+            mlong = 0
+            data_temp = None
+        elif m != -1 and m + datazhen_leng > 2176:
+            mlong = 2176 - m
+            data_temp = item[m:2176]
+            break
+        else:
+            mlong = 0
+            data_temp = None
+            break
+        n = m + datazhen_leng
+
+        t_temp3 = t_temp3 + 1 / fs3
+    return data_temp, mlong
+
+
 
 # def match_example1(item):
 #     pattern1 = b'\xEb\x90'
@@ -168,17 +235,19 @@ def match_example2(item,data_temp1,rlong):
 #         n = m+9
 
 
-pattern1 = b'\x1a\xcf\xfc\x1d'
-
+pattern1 = b'\x1a\xcf\xfc'
 n = 0
 while n <eof:
     m = data.find(pattern1,n,eof)
     if m != -1 and m+2184<eof:
-        channel = data[m+4:m+6]
-        if channel == b'\x66\x66':
-             match_example1(data[m+8:m+2184])
-        elif channel == b'\x55\x55':
-             data_temp,mlong = match_example2(data[m + 8:m + 2184],data_temp,mlong)
+        channel1 = data[m+3:m+6]
+        channel2 = data[m + 6:m + 8]
+        if channel1 == b'\x12\x66\x66':
+            match_example1(data[m+8:m+2184])
+        elif channel1 == b'\x11\x55\x55':
+            data_temp1,mlong1 = match_example2(data[m + 8:m + 2184],data_temp1,mlong1)
+        # elif channel1[0] == 29 and channel2 == b'\x00\x10':
+        #     data_temp2, mlong2 = match_example3(data[m + 8:m + 2184], data_temp2, mlong2)
         else:
             k = 0
 
@@ -190,6 +259,7 @@ while n <eof:
 
 f1.close()
 f2.close()
+f3.close()
 
 
 
